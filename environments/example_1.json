@@ -1,0 +1,75 @@
+{
+  "destinations_list": ["road_1", "road_2", "road_4", "road_5", "road_7", "road_8", "road_10", "road_11"],
+  "roads": {
+    "road_1": {
+      "intersections": ["inter_1"],
+      "connected_roads": ["road_2", "road_3", "road_12"]
+    },
+    "road_2": {
+      "intersections": ["inter_1"],
+      "connected_roads": ["road_1", "road_3", "road_12"]
+    },
+    "road_3": {
+      "intersections": ["inter_1", "inter_2"],
+      "connected_roads": ["road_2", "road_12", "road_4", "road_6", "road_1", "road_5"]
+    },
+    "road_4": {
+      "intersections": ["inter_2"],
+      "connected_roads": ["road_3", "road_6", "road_5"]
+    },
+    "road_5": {
+      "intersections": ["inter_2"],
+      "connected_roads": ["road_4", "road_3", "road_6"]
+    },
+    "road_6": {
+      "intersections": ["inter_2", "inter_3"],
+      "connected_roads": ["road_3", "road_4", "road_5", "road_9", "road_8", "road_7"]
+    },
+    "road_7": {
+      "intersections": ["inter_3"],
+      "connected_roads": ["road_6", "road_9", "road_8"]
+    },
+    "road_8": {
+      "intersections": ["inter_3"],
+      "connected_roads": ["road_9", "road_6", "road_7"]
+    },
+    "road_9": {
+      "intersections": ["inter_3", "inter_4"],
+      "connected_roads": ["road_10", "road_11", "road_12", "road_8", "road_6", "road_7"]
+    },
+    "road_10": {
+      "intersections": ["inter_4"],
+      "connected_roads": ["road_11", "road_12", "road_9"]
+    },
+    "road_11": {
+      "intersections": ["inter_4"],
+      "connected_roads": ["road_12", "road_9", "road_10"]
+    },
+    "road_12": {
+       "intersections": ["inter_4", "inter_1"],
+      "connected_roads": ["road_10", "road_11", "road_9", "road_1", "road_2", "road_3"]
+    }
+  },
+  "intersections": {
+    "inter_1": {
+      "roads": ["road_1", "road_2", "road_3", "road_12"],
+      "roads_x": ["road_1", "road_3"],
+      "roads_y": ["road_2", "road_12"]
+    },
+    "inter_2": {
+      "roads": ["road_3", "road_4", "road_5", "road_6"],
+      "roads_x": ["road_3", "road_5"],
+      "roads_y": ["road_4", "road_6"]
+    },
+    "inter_3": {
+      "roads": ["road_6", "road_7", "road_8", "road_9"],
+      "roads_x": ["road_9", "road_7"],
+      "roads_y": ["road_6", "road_8"]
+    },
+    "inter_4": {
+      "roads": ["road_9", "road_10", "road_11", "road_12"],
+      "roads_x": ["road_11", "road_9"],
+      "roads_y": ["road_12", "road_10"]
+    }
+  }
+}
