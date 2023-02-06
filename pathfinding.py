@@ -55,3 +55,4 @@ def optimize_greedy_path(greedy_path: list[utils.Road]) -> list[utils.Road]:
         except IndexError:
             modified_path.append(greedy_path[-1])
             return modified_path
+    return greedy_path

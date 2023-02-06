@@ -1,4 +1,5 @@
-#from environment import TrafficControlEnv
+from environment import TrafficControlEnv
+from collections import deque
 import utils
 import json
 import numpy as np
@@ -29,8 +30,9 @@ if __name__ == "__main__":
                                                           i_y=i_y,
                                                           t_x=0,
                                                           t_y=0,
-                                                          c_x=[],
-                                                          c_y=[])
+                                                          c_x=deque(),
+                                                          c_y=deque(),
+                                                          car_flow=CONFIG["seconds_to_pass_intersection"])
 
         roads[key] = utils.Road(id=key,
                                 intersections=[intersections[inter] for inter in value["intersections"]],
@@ -72,15 +74,19 @@ if __name__ == "__main__":
                     cars[new_car.id] = new_car
                     roads[road.id].cars.append(new_car)
 
-    for car in cars.values():
+    for car_id, car in cars.items():
         path = greedy(car.curr_road, car.destination)
         if not CONFIG["fully_connected"]:
             path = optimize_greedy_path(path)
-        car.path = path
+        path.pop(0)
+        cars[car_id].path = path
 
-    print(intersections["inter_1"].is_allowed_move(roads["road_12"]))
-
-
+    env = TrafficControlEnv(list(intersections.values()), list(roads.values()), list(cars.values()))
+    for i in range(10_000):
+        env.step(None)
+        if len(env.cars) == 0:
+            print(f"All cars arrived at destination at {i} second!")
+            break
     # print(roads["road_1"].cars)
     # result = greedy(roads["road_11"], roads["road_4"])
     # print(result)
