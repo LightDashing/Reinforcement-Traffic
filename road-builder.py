@@ -5,6 +5,7 @@ from PyQt5.QtGui import QPen, QBrush
 from PyQt5.QtCore import Qt
 from builder_interface import Ui_MainWindow
 from json_settings import Ui_Dialog
+from road_parameters import Ui_Dialog as Ui_Road
 import uuid
 import json
 
@@ -25,6 +26,47 @@ class JsonSettings(QDialog, Ui_Dialog):
         self.parent.created_environment = json.loads(self.textEdit.toPlainText())
 
 
+class RoadSettings(QDialog, Ui_Road):
+
+    ROAD_PARAMS: dict = {
+            "lanes_amount": 1,
+            "spawn_random": True,
+            "ignore_spawn_limit": False,
+            "spawn_cars_amount": 0,
+            "can_be_destination": True}
+
+    def __init__(self, parent, selected_road):
+        self.parent = parent
+        super(RoadSettings, self).__init__()
+        self.setupUi(self)
+        self.show()
+        self.raise_()
+        self.selected_road = selected_road
+        self.setWindowModality(Qt.ApplicationModal)
+        self.buttonBox.accepted.connect(self.save)
+        self.buttonBox.rejected.connect(self.rejected)
+        self.set_start_text()
+
+    def set_start_text(self):
+        self.lanes_amount.setText(str(self.selected_road.road_params["lanes_amount"]))
+        self.random_cars.setChecked(self.selected_road.road_params["spawn_random"])
+        self.ignore_limit.setChecked(self.selected_road.road_params["ignore_spawn_limit"])
+        self.car_spawn_num.setText(str(self.selected_road.road_params["spawn_cars_amount"]))
+        self.is_destination.setChecked(self.selected_road.road_params["can_be_destination"])
+
+    def save(self):
+        road_params = {
+            "lanes_amount": int(self.lanes_amount.text() if self.lanes_amount.text() else 1),
+            "spawn_random": self.random_cars.isChecked(),
+            "ignore_spawn_limit": self.ignore_limit.isChecked(),
+            "spawn_cars_amount": int(self.car_spawn_num.text() if self.car_spawn_num.text() else 0),
+            "can_be_destination": self.is_destination.isChecked()}
+        self.selected_road.road_params = road_params
+
+    def rejected(self):
+        pass
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
@@ -37,7 +79,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.rotate_90.clicked.connect(self.rotate_90f)
         self.del_object.clicked.connect(self.delete_element)
         self.parse_items.triggered.connect(self.parse)
-        self.json_settings.triggered.connect(self.open_modal)
+        self.json_settings.triggered.connect(self.open_json_settings)
+        self.obj_param_b.clicked.connect(self.open_road_settings)
         self.save_json.clicked.connect(self.save_file)
 
         self.scene = QGraphicsScene(self.centralwidget)
@@ -57,9 +100,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.created_environment = None
         self.settings_window = None
+        self.road_params = None
 
-    def open_modal(self):
+    def open_json_settings(self):
         self.settings_window = JsonSettings(self)
+
+    def open_road_settings(self):
+        selected_road = self.scene.selectedItems()[0]
+        self.road_params = RoadSettings(self, selected_road)
 
     def create_road(self):
         road = self.scene.addLine(0, 0, 0, 75)
@@ -67,6 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         road.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsSelectable)
         road.json_id = str(uuid.uuid4())
         road.setZValue(5)
+        road.road_params = RoadSettings.ROAD_PARAMS
         self.roads.append(road)
 
     def create_intersection(self):
@@ -109,6 +158,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 "intersections": connected_intersections,
                 "connected_roads": connected_roads
             }
+            if road.road_params:
+                for key, value in road.road_params.items():
+                    road_p[key] = value
+
             new_environment["roads"][road.json_id] = road_p
         for intersection in self.intersections:
             roads = [item.json_id for item in intersection.collidingItems() if item in self.roads]
