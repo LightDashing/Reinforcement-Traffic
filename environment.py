@@ -1,7 +1,6 @@
 import gym
 import utils
 import numpy as np
-#from main import CONFIG
 
 
 class TrafficControlEnv(gym.Env):
@@ -10,6 +9,9 @@ class TrafficControlEnv(gym.Env):
         self.intersections = intersections
         self.roads = roads
         self.cars = cars
+
+        # self.observation_space = gym.spaces.Box(low=0, high=1, shape=(len(intersections) * 2 + 1, ), dtype=np.int32)
+        # self.action_space = gym.spaces.Box(low=0, high=)
 
     def step(self, action):
 
