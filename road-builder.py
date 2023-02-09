@@ -33,7 +33,9 @@ class RoadSettings(QDialog, Ui_Road):
             "spawn_random": True,
             "ignore_spawn_limit": False,
             "spawn_cars_amount": 0,
-            "can_be_destination": True}
+            "can_be_destination": True,
+            "dest_priority": 10,
+            "dest_percent": 0}    # If dest_percent = 0, it will be evenly populated with as rest of other roads
 
     def __init__(self, parent, selected_road):
         self.parent = parent
@@ -53,6 +55,8 @@ class RoadSettings(QDialog, Ui_Road):
         self.ignore_limit.setChecked(self.selected_road.road_params["ignore_spawn_limit"])
         self.car_spawn_num.setText(str(self.selected_road.road_params["spawn_cars_amount"]))
         self.is_destination.setChecked(self.selected_road.road_params["can_be_destination"])
+        self.percentage_dest.setText(str(self.selected_road.road_params["dest_percent"]))
+        self.destination_priority.setText(str(self.selected_road.road_params["dest_priority"]))
 
     def save(self):
         road_params = {
@@ -60,7 +64,9 @@ class RoadSettings(QDialog, Ui_Road):
             "spawn_random": self.random_cars.isChecked(),
             "ignore_spawn_limit": self.ignore_limit.isChecked(),
             "spawn_cars_amount": int(self.car_spawn_num.text() if self.car_spawn_num.text() else 0),
-            "can_be_destination": self.is_destination.isChecked()}
+            "can_be_destination": self.is_destination.isChecked(),
+            "dest_priority": int(self.destination_priority.text()),
+            "dest_percent": int(self.destination_priority.text())}
         self.selected_road.road_params = road_params
 
     def rejected(self):
@@ -107,6 +113,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def open_road_settings(self):
         selected_road = self.scene.selectedItems()[0]
+        if selected_road in self.intersections:
+            return
         self.road_params = RoadSettings(self, selected_road)
 
     def create_road(self):

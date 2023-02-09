@@ -8,9 +8,9 @@
   "interval_mu": 30.0,
   "road_length_sigma": 1000,
   "road_length_mu": 2500,
-  "start_cars_max_roads": 40,
-  "roads_cars_sigma": 2,
-  "roads_cars_mu": 5,
+  "start_cars_max_roads": 120,
+  "roads_cars_sigma": 4,
+  "roads_cars_mu": 10,
   "new_cars_per_step": 5,
   "average_car_acc_time": 10.0
 }

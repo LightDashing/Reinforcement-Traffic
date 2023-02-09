@@ -3,51 +3,135 @@
   "roads": {
     "road_1": {
       "intersections": ["inter_1"],
-      "connected_roads": ["road_2", "road_3", "road_12"]
+      "connected_roads": ["road_2", "road_3", "road_12"],
+      "lanes_amount": 1,
+      "spawn_random": false,
+      "ignore_spawn_limit": true,
+      "spawn_cars_amount": 80,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_2": {
       "intersections": ["inter_1"],
-      "connected_roads": ["road_1", "road_3", "road_12"]
+      "connected_roads": ["road_1", "road_3", "road_12"],
+      "lanes_amount": 2,
+      "spawn_random": false,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_3": {
       "intersections": ["inter_1", "inter_2"],
-      "connected_roads": ["road_2", "road_12", "road_4", "road_6", "road_1", "road_5"]
+      "connected_roads": ["road_2", "road_12", "road_4", "road_6", "road_1", "road_5"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_4": {
       "intersections": ["inter_2"],
-      "connected_roads": ["road_3", "road_6", "road_5"]
+      "connected_roads": ["road_3", "road_6", "road_5"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_5": {
       "intersections": ["inter_2"],
-      "connected_roads": ["road_4", "road_3", "road_6"]
+      "connected_roads": ["road_4", "road_3", "road_6"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_6": {
       "intersections": ["inter_2", "inter_3"],
-      "connected_roads": ["road_3", "road_4", "road_5", "road_9", "road_8", "road_7"]
+      "connected_roads": ["road_3", "road_4", "road_5", "road_9", "road_8", "road_7"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_7": {
       "intersections": ["inter_3"],
-      "connected_roads": ["road_6", "road_9", "road_8"]
+      "connected_roads": ["road_6", "road_9", "road_8"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 2,
+      "dest_percent": 20
     },
     "road_8": {
       "intersections": ["inter_3"],
-      "connected_roads": ["road_9", "road_6", "road_7"]
+      "connected_roads": ["road_9", "road_6", "road_7"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_9": {
       "intersections": ["inter_3", "inter_4"],
-      "connected_roads": ["road_10", "road_11", "road_12", "road_8", "road_6", "road_7"]
+      "connected_roads": ["road_10", "road_11", "road_12", "road_8", "road_6", "road_7"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_10": {
       "intersections": ["inter_4"],
-      "connected_roads": ["road_11", "road_12", "road_9"]
+      "connected_roads": ["road_11", "road_12", "road_9"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 1,
+      "dest_percent": 30
     },
     "road_11": {
       "intersections": ["inter_4"],
-      "connected_roads": ["road_12", "road_9", "road_10"]
+      "connected_roads": ["road_12", "road_9", "road_10"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     },
     "road_12": {
-       "intersections": ["inter_4", "inter_1"],
-      "connected_roads": ["road_10", "road_11", "road_9", "road_1", "road_2", "road_3"]
+      "intersections": ["inter_4", "inter_1"],
+      "connected_roads": ["road_10", "road_11", "road_9", "road_1", "road_2", "road_3"],
+      "lanes_amount": 1,
+      "spawn_random": true,
+      "ignore_spawn_limit": false,
+      "spawn_cars_amount": 0,
+      "can_be_destination": true,
+      "dest_priority": 10,
+      "dest_percent": 0
     }
   },
   "intersections": {

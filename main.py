@@ -41,7 +41,14 @@ if __name__ == "__main__":
                                 speed_limit=CONFIG['speed_limit_meters'],
                                 cars=[],
                                 connected_roads_l=value["connected_roads"],
-                                connected_roads_s=set())
+                                connected_roads_s=set(),
+                                lanes=value["lanes_amount"],
+                                spawn_random=value["spawn_random"],
+                                ignore_spawn_limit=value["ignore_spawn_limit"],
+                                spawn_cars_amount=value["spawn_cars_amount"],
+                                can_be_destination=value["can_be_destination"],
+                                dest_priority=value["dest_priority"],
+                                dest_percent=value["dest_percent"])
 
     for key, value in ENV_CONF["intersections"].items():
         intersections[key].roads = [roads[road] for road in value["roads"]]
@@ -55,24 +62,49 @@ if __name__ == "__main__":
 
     if not CONFIG["fully_connected"]:
         edge_roads = [road for road in roads.values() if len(road.intersections) < 2]
+        destination_roads = edge_roads.copy()
+        destination_roads.sort(key=lambda x: x.dest_priority)
+        destination_roads = deque(destination_roads)
+
+        max_cars = sum([road.spawn_cars_amount for road in roads.values() if road.ignore_spawn_limit]) + CONFIG["start_cars_max_roads"]
+
+        dest_road = destination_roads.popleft()
+        dest_cars = 0
+        max_dest_cars = max_cars * (dest_road.dest_percent / 100) \
+            if dest_road.dest_percent != 0 else len(edge_roads) * 100 / max_cars
 
         for road in edge_roads:
-            cars_amount = int(np.round(CONFIG['roads_cars_sigma'] * np.random.randn() + CONFIG['roads_cars_mu'], 0))
+
+            if road.spawn_random:
+                cars_amount = int(np.round(CONFIG['roads_cars_sigma'] * np.random.randn() + CONFIG['roads_cars_mu'], 0))
+            else:
+                cars_amount = road.spawn_cars_amount
+
             for i in range(cars_amount):
                 new_car = utils.Car(
                     id=str(uuid.uuid4()),
                     position=0,
                     speed=16.67,
                     curr_road=road,
-                    destination=np.random.choice(list(filter(lambda x: x != road, edge_roads))),
+                    destination=dest_road,
+                    #destination=np.random.choice(list(filter(lambda x: x != road, edge_roads))),
                     path=None,
                     curr_intersection=None,
                     acc_time=CONFIG["average_car_acc_time"]
                 )
-                if cars_iter <= CONFIG["start_cars_max_roads"]:
-                    cars_iter += 1
-                    cars[new_car.id] = new_car
-                    roads[road.id].cars.append(new_car)
+                if cars_iter > CONFIG["start_cars_max_roads"] and not road.ignore_spawn_limit:
+                    break
+                cars_iter += 1
+                dest_cars += 1
+                cars[new_car.id] = new_car
+                roads[road.id].cars.append(new_car)
+
+                if dest_cars >= max_dest_cars:
+                    if destination_roads:
+                        dest_road = destination_roads.popleft()
+                        dest_cars = 0
+                        max_dest_cars = max_cars * (dest_road.dest_percent / 100) \
+                            if dest_road.dest_percent != 0 else len(edge_roads) * 100 / max_cars
 
     for car_id, car in cars.items():
         path = greedy(car.curr_road, car.destination)

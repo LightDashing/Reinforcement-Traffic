@@ -11,6 +11,14 @@ class Road:
     cars: list["Car"]
     length: float
     speed_limit: float
+    lanes: int  # right now there is no support for uneven lanes, so there is always lanes*2 total amount of road lanes
+    spawn_random: bool  # if true, then spawns random amount of cars
+    ignore_spawn_limit: bool # if true, then global car limit is ignored
+    spawn_cars_amount: int  # if spawn_random true, uses this variable to spawn cars
+    can_be_destination: bool  # right now doesn't work TODO: change how destinations_list is created
+    dest_priority: int  # priority in destination generation queue
+    dest_percent: int  # amount of cars from all pool to generate
+
 
     def __hash__(self):
         return hash(self.id + str(type(self)))
@@ -45,9 +53,9 @@ class Intersection:
 
     t_switch: int = 0  # current time, when t_switch == i_x or i_y, active line switches
 
-    curr_active = None  # 0 for road x, 1 for road y
+    curr_active = None  # array, roads_x or roads_y
     curr_active_queue = None
-    _curr_active_num: int = None
+    _curr_active_num: int = None  # 0 for road x, 1 for road y
     t_switch_max: float = None  # current max time, after which update change lanes
     car_flow: int = 3
 
@@ -84,9 +92,13 @@ class Intersection:
     def move_cars(self):
         if not self.curr_active_queue:
             return
-        if self.t_switch % self.car_flow == 0:
-            car = self.curr_active_queue.popleft()
-            car.pass_intersection()
+        for road in self.curr_active:  # we move cars at each side of intersection
+            for i in range(road.lanes):  # if road has more than one lane for each direction
+                if self.t_switch % self.car_flow == 0:
+                    if not self.curr_active_queue:
+                        return
+                    car = self.curr_active_queue.popleft()
+                    car.pass_intersection()
 
     def add_car(self, car_road: Road, car: "Car"):
         if car_road in self.roads_x:
