@@ -1,10 +1,13 @@
-from environment import TrafficControlEnv
+import collections
+
+import environment
 from collections import deque
 import utils
 import json
 import numpy as np
 from pathfinding import greedy, optimize_greedy_path
 import uuid
+import gc
 
 
 with open("config/default.json", "r") as f:
@@ -16,6 +19,74 @@ if CONFIG["set_seed"]:
     np.random.seed(CONFIG["seed"])
 
 
+def generate_cars(roads: dict[str, utils.Road], intersections: dict[str, utils.Intersection]) -> dict[str, utils.Car]:
+    cars = {}
+    cars_iter = 0
+    if not CONFIG["fully_connected"]:
+        edge_roads = [road for road in roads.values() if len(road.intersections) < 2]
+        destination_roads = edge_roads.copy()
+        destination_roads.sort(key=lambda x: x.dest_priority)
+        destination_roads = deque(destination_roads)
+
+        max_cars = sum([road.spawn_cars_amount for road in roads.values() if road.ignore_spawn_limit]) + CONFIG["start_cars_max_roads"]
+
+        dest_road = destination_roads.popleft()
+        dest_cars = 0
+        max_dest_cars = max_cars * (dest_road.dest_percent / 100) \
+            if dest_road.dest_percent != 0 else len(edge_roads) * 100 / max_cars
+        for road in edge_roads:
+            if road.spawn_random:
+                cars_amount = int(np.round(CONFIG['roads_cars_sigma'] * np.random.randn() + CONFIG['roads_cars_mu'], 0))
+            else:
+                cars_amount = road.spawn_cars_amount
+
+            for i in range(cars_amount):
+                new_car = utils.Car(
+                    id=str(uuid.uuid4()),
+                    position=0,
+                    speed=16.67,
+                    curr_road=road,
+                    destination=dest_road,
+                    #destination=np.random.choice(list(filter(lambda x: x != road, edge_roads))),
+                    path=None,
+                    curr_intersection=None,
+                    acc_time=CONFIG["average_car_acc_time"]
+                )
+                if cars_iter > max_cars:
+                    break
+                cars_iter += 1
+                dest_cars += 1
+                cars[new_car.id] = new_car
+                roads[road.id].cars.append(new_car)
+
+                if dest_cars >= max_dest_cars:
+                    if destination_roads:
+                        dest_road = destination_roads.popleft()
+                        dest_cars = 0
+                        max_dest_cars = max_cars * (dest_road.dest_percent / 100) \
+                            if dest_road.dest_percent != 0 else len(edge_roads) * 100 / max_cars
+
+    # Statistics
+    dests = collections.defaultdict(int)
+    spawns = collections.defaultdict(int)
+
+    for car_id, car in cars.items():
+        path = greedy(car.curr_road, car.destination)
+        dests[car.destination.id] += 1
+        spawns[car.curr_road.id] += 1
+        if not CONFIG["fully_connected"]:
+            path = optimize_greedy_path(path)
+        path.pop(0)
+        cars[car_id].path = path
+
+    print("Destinations distribution:", dests)
+    print("Spawn distribution:", spawns, max_cars)
+
+    return cars
+
+
+
+
 if __name__ == "__main__":
     roads = {}
     intersections = {}
@@ -24,8 +95,8 @@ if __name__ == "__main__":
     for key, value in ENV_CONF["roads"].items():
         for inter in value["intersections"]:
             if not intersections.get(inter):
-                i_x, i_y = np.round(CONFIG['interval_sigma'] * np.random.randn(2) + CONFIG['interval_mu'],3)
-                intersections[inter] = utils.Intersection(inter, [], [], [],
+                i_x, i_y = np.round(CONFIG['interval_sigma'] * np.random.randn(2) + CONFIG['interval_mu'], 0)
+                intersections[inter] = utils.Intersection(inter, [], set([]), set([]),
                                                           i_x=i_x,
                                                           i_y=i_y,
                                                           t_x=0,
@@ -60,71 +131,19 @@ if __name__ == "__main__":
         roads[key].connected_roads_l = [roads[r_id] for r_id in value.connected_roads_l]
         roads[key].connected_roads_s = set(roads[key].connected_roads_l)
 
-    if not CONFIG["fully_connected"]:
-        edge_roads = [road for road in roads.values() if len(road.intersections) < 2]
-        destination_roads = edge_roads.copy()
-        destination_roads.sort(key=lambda x: x.dest_priority)
-        destination_roads = deque(destination_roads)
+    cars = generate_cars(roads, intersections)
 
-        max_cars = sum([road.spawn_cars_amount for road in roads.values() if road.ignore_spawn_limit]) + CONFIG["start_cars_max_roads"]
-
-        dest_road = destination_roads.popleft()
-        dest_cars = 0
-        max_dest_cars = max_cars * (dest_road.dest_percent / 100) \
-            if dest_road.dest_percent != 0 else len(edge_roads) * 100 / max_cars
-
-        for road in edge_roads:
-
-            if road.spawn_random:
-                cars_amount = int(np.round(CONFIG['roads_cars_sigma'] * np.random.randn() + CONFIG['roads_cars_mu'], 0))
-            else:
-                cars_amount = road.spawn_cars_amount
-
-            for i in range(cars_amount):
-                new_car = utils.Car(
-                    id=str(uuid.uuid4()),
-                    position=0,
-                    speed=16.67,
-                    curr_road=road,
-                    destination=dest_road,
-                    #destination=np.random.choice(list(filter(lambda x: x != road, edge_roads))),
-                    path=None,
-                    curr_intersection=None,
-                    acc_time=CONFIG["average_car_acc_time"]
-                )
-                if cars_iter > CONFIG["start_cars_max_roads"] and not road.ignore_spawn_limit:
-                    break
-                cars_iter += 1
-                dest_cars += 1
-                cars[new_car.id] = new_car
-                roads[road.id].cars.append(new_car)
-
-                if dest_cars >= max_dest_cars:
-                    if destination_roads:
-                        dest_road = destination_roads.popleft()
-                        dest_cars = 0
-                        max_dest_cars = max_cars * (dest_road.dest_percent / 100) \
-                            if dest_road.dest_percent != 0 else len(edge_roads) * 100 / max_cars
-
-    for car_id, car in cars.items():
-        path = greedy(car.curr_road, car.destination)
-        if not CONFIG["fully_connected"]:
-            path = optimize_greedy_path(path)
-        path.pop(0)
-        cars[car_id].path = path
-
-    env = TrafficControlEnv(list(intersections.values()), list(roads.values()), list(cars.values()))
-    for i in range(10_000):
-        env.step(None)
-        if len(env.cars) == 0:
-            print(f"All cars arrived at destination at {i} second!")
-            break
-    # print(roads["road_1"].cars)
-    # result = greedy(roads["road_11"], roads["road_4"])
-    # print(result)
-    # print(optimize_greedy_path(result))
-    # for road in roads.items():
-    #     print(road)
-    # for inter in intersections.values():
-    #     print([road.connected_roads_l for road in inter.roads])
-    #print(*[inter.roads for inter in intersections.values()])
+    env = environment.TrafficControlEnv(intersections, roads, list(cars.values()), CONFIG)
+    total_reward = 0
+    for i in range(2):
+        for j in range(10_000):
+            _, reward, _, _, _ = env.step(np.round(CONFIG['interval_sigma'] * np.random.randn(len(intersections) * 2) + CONFIG['interval_mu'], 0))
+            total_reward += reward
+            if len(env.cars) == 0:
+                print(f"All cars arrived at destination at {j} second!")
+                break
+        print(total_reward)
+        total_reward = 0
+        env.reset()
+    print([len(road.cars) for road in env.roads])
+    gc.collect()

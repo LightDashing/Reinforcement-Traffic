@@ -2,15 +2,15 @@
   "fully_connected": false,
   "set_seed": true,
   "seed": 42,
-  "seconds_to_pass_intersection": 1,
+  "seconds_to_pass_intersection": 3,
   "speed_limit_meters": 16.67,
   "interval_sigma": 10.0,
   "interval_mu": 30.0,
   "road_length_sigma": 1000,
   "road_length_mu": 2500,
   "start_cars_max_roads": 120,
-  "roads_cars_sigma": 4,
-  "roads_cars_mu": 10,
+  "roads_cars_sigma": 5,
+  "roads_cars_mu": 30,
   "new_cars_per_step": 5,
   "average_car_acc_time": 10.0
 }

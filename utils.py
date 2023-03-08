@@ -19,16 +19,11 @@ class Road:
     dest_priority: int  # priority in destination generation queue
     dest_percent: int  # amount of cars from all pool to generate
 
-
     def __hash__(self):
         return hash(self.id + str(type(self)))
 
     def __eq__(self, other):
         return other and self.id == other.id
-
-    # def __repr__(self):
-    #     return f"<Id: {self.id}| Intersections: {[inter.id for inter in self.intersections]}| " \
-    #            f"Connected: {[road.id for road in self.connected_roads_l]}>"
 
     def __repr__(self):
         return f"<Id: {self.id}>"
@@ -59,9 +54,6 @@ class Intersection:
     t_switch_max: float = None  # current max time, after which update change lanes
     car_flow: int = 3
 
-    # def __repr__(self):
-    #     return f"<Id: {self.id}| Roads: {[road.id for road in self.roads]}>"
-
     def __repr__(self):
         return f"<Id: {self.id}>"
 
@@ -80,8 +72,9 @@ class Intersection:
             self.t_switch_max = self.i_y
             self._curr_active_num = 1
 
-    def update(self):
+    def update(self, action):
         self.t_switch += 1
+        self.i_x, self.i_y = action
         if self.t_switch >= self.t_switch_max:
             if self._curr_active_num == 1:
                 self.set_current()
@@ -156,6 +149,7 @@ class Car:
     def pass_intersection(self):
         self.curr_intersection = None
         self.curr_road = self.path.pop(0)
+        self.curr_road.cars.append(self)
 
         self.speed += self.curr_road.speed_limit / self.acc_time
         self.position = 0
@@ -177,7 +171,9 @@ class Car:
 
         if self.curr_road == self.destination:
             self.at_destination = True
+            self.curr_road.cars.remove(self)
             return
 
+        self.curr_road.cars.remove(self)
         self.curr_intersection = self.get_current_intersection()
         self.curr_intersection.add_car(self.curr_road, self)

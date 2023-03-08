@@ -16,7 +16,7 @@
       "intersections": ["inter_1"],
       "connected_roads": ["road_1", "road_3", "road_12"],
       "lanes_amount": 2,
-      "spawn_random": false,
+      "spawn_random": true,
       "ignore_spawn_limit": false,
       "spawn_cars_amount": 0,
       "can_be_destination": true,
@@ -76,7 +76,7 @@
       "spawn_cars_amount": 0,
       "can_be_destination": true,
       "dest_priority": 2,
-      "dest_percent": 20
+      "dest_percent": 30
     },
     "road_8": {
       "intersections": ["inter_3"],
